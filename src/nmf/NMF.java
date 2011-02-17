@@ -17,12 +17,16 @@ public class NMF {
 	 * @return ResultadoNMF com matriz w ( n x r ) e H (r x m)
 	 */
 	public static ResultadoNMF nmf(SimpleMatrix d, int r) {
+		double oldObj, obj;
 		int n = d.numRows();
 		int m = d.numCols();
 		SimpleMatrix w = initMatrizFator(n, r);
 		SimpleMatrix h = initMatrizFator(r, m);
 
 		for (int i = 0; i < maxInteracoes; i++) {
+			
+			oldObj = calculaFuncaoObjetivo(d, w, h);
+			
 			// calcula o produto apenas 1 vez
 			SimpleMatrix wh = w.mult(h);
 			
@@ -47,12 +51,25 @@ public class NMF {
 			}
 			
 			
-			double erro = NormOps.normP2(d.minus(w.mult(h)).getMatrix());
-			if( erro == 0) break;
+			obj = calculaFuncaoObjetivo(d, w, h);
+			double erro = oldObj - obj;
 	
 		}
 		
 		return new ResultadoNMF(w, h);
+	}
+	
+	/**
+	 * Calcula o valor da função objetivo
+	 * @param d Matriz original
+	 * @param w Matriz fator
+	 * @param h Matriz fator
+	 * @return Valor da função objetivo
+	 */
+	static double calculaFuncaoObjetivo(SimpleMatrix d, SimpleMatrix w, SimpleMatrix h){
+		SimpleMatrix wh = w.mult(h);
+		SimpleMatrix minus = d.minus(wh);
+		return NormOps.normP2(minus.getMatrix());
 	}
 	
 	
